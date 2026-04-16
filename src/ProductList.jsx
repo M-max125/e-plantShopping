@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem } from './CartSlice';
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const cartItems = useSelector((state) => state.cart.items);
+    const dispatch = useDispatch();
 
     const plantsArray = [
         {
@@ -252,6 +256,14 @@ function ProductList({ onHomeClick }) {
         e.preventDefault();
         setShowCart(false);
     };
+
+    const addBtnStatus = (plant) => {
+        if (cartItems.length > 0) {
+            const itemInCart = cartItems.find(item => item.name === plant);
+            if (itemInCart) return {className: "product-button-grey", text: "ADDED TO CART"}
+        }
+        return {className: "product-button-green", text: "ADD TO CART"}
+    }
     return (
         <div>
             <div className="navbar" style={styleObj}>
@@ -275,7 +287,32 @@ function ProductList({ onHomeClick }) {
             {!showCart ? (
                 <div className="product-grid">
 
-
+                {plantsArray.map((section, index) => {
+                    return <div key={section.category}>
+                        <div className='plantname_heading'>
+                            <h2 className="plant_heading">{section.category}</h2>
+                           
+                        </div>
+                        <div className='product-list'>
+                                {section.plants.map((p, index) => {
+                                    return <div className='product-card' key={p.name}>
+                                    <div className='product-image-container'>
+                                    <img src={p.image} alt={p.name} className='product-image'/>
+                                    </div>
+                                    <h3 className='product-title'>{p.name}</h3>
+                                    <p>{p.description}</p>
+                                    <h6 className='product-price'>{p.cost}</h6>
+                                    <button 
+                                    className={`product-button-add ${addBtnStatus(p.name).className}`}
+                                    onClick={() => dispatch(addItem(p))}
+                                    >
+                                        {addBtnStatus(p.name).text}
+                                    </button>
+                                    </div>
+                                })}     
+                        </div>
+                        </div>
+                })}
                 </div>
             ) : (
                 <CartItem onContinueShopping={handleContinueShopping} />
